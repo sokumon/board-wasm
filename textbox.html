@@ -1,0 +1,85 @@
+<canvas id=foo width=700 height=500 style="border: 3px solid black;"></canvas>
+<input type="text" id="words"></input>
+<button id="clicked">Create</button>
+<script type="text/javascript"
+  src="https://unpkg.com/canvaskit-wasm@0.19.0/bin/canvaskit.js"></script>
+<script type="text/javascript">
+
+  let loadFont  = fetch("comic.ttf").then(res=>res.arrayBuffer())
+  const ckLoaded = CanvasKitInit({
+    locateFile: (file) => 'https://unpkg.com/canvaskit-wasm@0.19.0/bin/'+file});
+  ckLoaded.then((CanvasKit) => {
+    loadFont.then((SansData)=>{
+        const surface = CanvasKit.MakeCanvasSurface('foo');
+        const canvas = surface.getCanvas();
+        canvas.clear(CanvasKit.Color4f(0.9, 0.9, 0.9, 1.0));
+
+
+  const fontMgr = CanvasKit.FontMgr.FromData([SansData]);
+  const paraStyle = new CanvasKit.ParagraphStyle({
+    textStyle: {
+      color: CanvasKit.BLACK,
+      fontFamilies: ['Sans-Serif'],
+      fontSize: 28,
+    },
+    textAlign: CanvasKit.TextAlign.Left,
+  });
+// width in pixels to use when wrapping text
+    console.log(CanvasKit.Typeface.GetDefault)
+    surface.flush();
+    // const font = new CanvasKit.Font(CanvasKit.Typeface, 20);
+  function draw(canvas) {
+      canvas.clear(CanvasKit.WHITE);
+      let [note,paint] = createRectangle(CanvasKit)
+      let paragraph = createParagraph(CanvasKit,paraStyle,fontMgr)
+      canvas.drawRect(note,paint)
+      canvas.drawParagraph(paragraph, 10, 10);
+      surface.requestAnimationFrame(draw)
+    //   canvas.drawText('this is ascii text', 5, 100, paint, textFont);
+
+    //   canvas.drawRRect(rr, paint);
+    }
+    surface.requestAnimationFrame(draw)
+    })
+    // const paint = new CanvasKit.Paint();
+    // paint.setColor(CanvasKit.Color4f(0.9,0.4, 1.0, 1.0));
+    // paint.setStyle(CanvasKit.PaintStyle.Fill);
+    // paint.setAntiAlias(true);
+    // const rr = CanvasKit.LTRBRect(0, 0, 210, 260);
+
+    // console.log(surface)
+  });
+
+  function createRectangle(CanvasKit){
+    let note = CanvasKit.XYWHRect(10, 10, 28*5, 28*5);
+    const paint = new CanvasKit.Paint();
+    paint.setColor(CanvasKit.Color4f(0.9, 0, 0, 1.0));
+    paint.setStyle(CanvasKit.PaintStyle.Stroke);
+    paint.setAntiAlias(true);
+    return[note,paint]
+  }
+
+  document.addEventListener("keydown",function(e){
+    console.log(text)
+    if(e.key == "Enter"){
+        
+    }else{
+        text += ` ${e.key}`;
+    }
+    
+   
+    text = text.replace(/\s/g, "");
+  })
+
+  text = " "
+  function createParagraph(CanvasKit,paraStyle,fontMgr){
+    // const text = document.getElementById("words").value;
+    const builder = CanvasKit.ParagraphBuilder.Make(paraStyle, fontMgr);
+    builder.addText(text);
+    const paragraph = builder.build();
+    console.log(paragraph.getHeight())
+    paragraph.layout(250); 
+    console.log(paragraph.getHeight())
+    return paragraph;
+  }
+</script>

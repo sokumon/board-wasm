@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>CanvasKit Whiteboard with Serialization</title>
+    <script src="https://unpkg.com/canvaskit-wasm/bin/canvaskit.js"></script>
+</head>
+<body>
+    <canvas id="canvas" width="800" height="600" style="border:1px solid black;"></canvas>
+    <button id="save">Save Drawing</button>
+    <button id="load">Load Drawing</button>
+    <textarea id="serializedData" style="width:100%; height:200px;"></textarea>
+    <script>
+        CanvasKitInit({
+            locateFile: (file) => 'https://unpkg.com/canvaskit-wasm/bin/' + file,
+        }).then((CanvasKit) => {
+            const canvasElement = document.getElementById('canvas');
+            const surface = CanvasKit.MakeCanvasSurface(canvasElement);
+
+            if (!surface) {
+                console.error('Could not make surface');
+                return;
+            }
+
+            const canvas = surface.getCanvas();
+
+            const paint = new CanvasKit.Paint();
+            paint.setColor(CanvasKit.BLUE);
+            paint.setStrokeWidth(5.0);
+            paint.setStyle(CanvasKit.PaintStyle.Stroke);
+
+            let paths = [];
+            let drawing = false;
+            let lastX = 0, lastY = 0;
+
+            function drawLine(x0, y0, x1, y1) {
+                const path = new CanvasKit.Path();
+                path.moveTo(x0, y0);
+                path.lineTo(x1, y1);
+                canvas.drawPath(path, paint);
+                paths.push({x0, y0, x1, y1});
+                surface.flush();
+            }
+
+            canvasElement.addEventListener('mousedown', (e) => {
+                drawing = true;
+                lastX = e.offsetX;
+                lastY = e.offsetY;
+            });
+
+            canvasElement.addEventListener('mousemove', (e) => {
+                if (drawing) {
+                    drawLine(lastX, lastY, e.offsetX, e.offsetY);
+                    lastX = e.offsetX;
+                    lastY = e.offsetY;
+                }
+            });
+
+            canvasElement.addEventListener('mouseup', () => {
+                drawing = false;
+            });
+
+            canvasElement.addEventListener('mouseleave', () => {
+                drawing = false;
+            });
+
+            document.getElementById('save').addEventListener('click', () => {
+                const serializedData = JSON.stringify(paths);
+                document.getElementById('serializedData').value = serializedData;
+            });
+
+            document.getElementById('load').addEventListener('click', () => {
+                const serializedData = document.getElementById('serializedData').value;
+                const loadedPaths = JSON.parse(serializedData);
+
+                // Clear the canvas
+                canvas.clear(CanvasKit.TRANSPARENT);
+
+                loadedPaths.forEach(({x0, y0, x1, y1}) => {
+                    const path = new CanvasKit.Path();
+                    path.moveTo(x0, y0);
+                    path.lineTo(x1, y1);
+                    canvas.drawPath(path, paint);
+                });
+                surface.flush();
+            });
+        });
+    </script>
+</body>
+</html>

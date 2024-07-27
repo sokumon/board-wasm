@@ -1,0 +1,24 @@
+body{
+    margin: 0px 0px 0px 0px;
+    padding: 0px 0px 0px 0px;
+}
+#toolbar{
+    width: 500px;
+    height: 50px;
+    border: 5px black solid;
+    position: absolute;
+    left: 25%;
+    border-radius: 30px;
+    display: block;
+}
+
+#page-selector{
+    width: 150px;
+    height: 500px;
+    border: 5px red solid;
+    position: absolute;
+    display: block;
+}
+#foo{
+    border: 3px rebeccapurple solid;
+}
